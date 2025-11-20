@@ -1,6 +1,5 @@
 import { useAtomValue } from '@effect-atom/atom-react'
-import { graphAtom } from '../state/atoms'
-import { getGraphStats } from '../state/graphOperations'
+import { graphStatsAtom } from '../state/atoms'
 import './StatsPanel.css'
 
 /**
@@ -9,10 +8,9 @@ import './StatsPanel.css'
  * Displays graph statistics and metrics.
  */
 export function StatsPanel() {
-  const graph = useAtomValue(graphAtom)
-  const stats = getGraphStats(graph)
+  const stats = useAtomValue(graphStatsAtom)
 
-  if (!graph) {
+  if (stats.nodeCount === 0) {
     return null
   }
 

@@ -1,7 +1,7 @@
 import { useAtomValue } from '@effect-atom/atom-react'
 import { graphAtom, selectedNodeAtom } from '../state/atoms'
 import * as EG from '@adjunct/core/EffectGraph'
-import * as Option from 'effect/Option'
+import { Option } from 'effect'
 import './NodeInspector.css'
 
 /**
@@ -29,11 +29,12 @@ export function NodeInspector() {
 
   const nodeOption = EG.getNode(graph, selection.nodeId)
 
-  if (Option.isNone(nodeOption)) {
+  // Handle Option type mismatch between Effect versions
+  if (nodeOption._tag === "None") {
     return null
   }
 
-  const node = Option.getOrThrow(nodeOption)
+  const node = nodeOption.value
   const children = EG.getChildren(graph, node.id)
 
   return (
@@ -56,10 +57,11 @@ export function NodeInspector() {
       <div className="inspector-section">
         <div className="inspector-label">Operation</div>
         <div className="inspector-value">
-          {Option.match(node.metadata.operation, {
-            onNone: () => <span className="inspector-none">root</span>,
-            onSome: (op) => <span className="badge badge-operation">{op}</span>
-          })}
+          {node.metadata.operation._tag === "None" ? (
+            <span className="inspector-none">root</span>
+          ) : (
+            <span className="badge badge-operation">{node.metadata.operation.value}</span>
+          )}
         </div>
       </div>
 
@@ -77,10 +79,11 @@ export function NodeInspector() {
           <div className="metadata-row">
             <span className="metadata-key">Parent</span>
             <span className="metadata-value">
-              {Option.match(node.parentId, {
-                onNone: () => 'none',
-                onSome: (id) => id.slice(0, 8) + '...'
-              })}
+              {node.parentId._tag === "None" ? (
+                'none'
+              ) : (
+                node.parentId.value.slice(0, 8) + '...'
+              )}
             </span>
           </div>
         </div>

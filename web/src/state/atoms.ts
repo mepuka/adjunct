@@ -6,13 +6,14 @@
  * seamlessly with our Effect-based graph operations.
  */
 
-import { Atom, Writable } from '@effect-atom/atom'
-import type * as EG from '@adjunct/core/EffectGraph'
+import * as EG from "@adjunct/core/EffectGraph"
+import { Atom } from "@effect-atom/atom"
+import * as Effect from "effect/Effect"
 
 /**
  * Visualization mode for the graph
  */
-export type VisualizationMode = 'dag' | 'tree' | 'functor'
+export type VisualizationMode = "dag" | "tree" | "functor"
 
 /**
  * Node selection state
@@ -26,97 +27,98 @@ export interface NodeSelection {
  * Initial state
  */
 const initialState = {
-  inputText: 'The quick brown fox jumps over the lazy dog. This is a demonstration of text graph operations. We can visualize the functional transformations.',
+  inputText:
+    "The quick brown fox jumps over the lazy dog. This is a demonstration of text graph operations. We can visualize the functional transformations.",
   graph: null as EG.EffectGraph<string> | null,
   selectedNode: {
     nodeId: null,
     path: []
   } as NodeSelection,
-  visualizationMode: 'functor' as VisualizationMode,
+  visualizationMode: "functor" as VisualizationMode,
   operations: [] as ReadonlyArray<string>,
   isProcessing: false,
   error: null as string | null
 }
 
 /**
- * Derived atom for input text
+ * Simple writable atoms - Atom.make(initialValue) creates a Writable<A>
+ * TypeScript will infer the correct Writable type from the initial value
  */
-export const inputTextAtom = Writable.make(initialState.inputText)
+export const inputTextAtom = Atom.make(initialState.inputText)
+
+export const graphAtom = Atom.make(null as EG.EffectGraph<string> | null)
+
+export const selectedNodeAtom = Atom.make(initialState.selectedNode)
+
+export const visualizationModeAtom = Atom.make(initialState.visualizationMode)
+
+export const operationsAtom = Atom.make([] as ReadonlyArray<string>)
+
+export const isProcessingAtom = Atom.make(false)
+
+export const errorAtom = Atom.make(null as string | null)
 
 /**
- * Derived atom for the current graph
+ * Derived atom for graph statistics
+ * Automatically recomputes when graphAtom changes
  */
-export const graphAtom = Writable.make<EG.EffectGraph<string> | null>(null)
+export const graphStatsAtom = Atom.make((get) => {
+  const graph = get(graphAtom)
+  if (!graph) {
+    return {
+      nodeCount: 0,
+      edgeCount: 0,
+      depth: 0,
+      roots: 0
+    }
+  }
 
-/**
- * Derived atom for selected node
- */
-export const selectedNodeAtom = Writable.make<NodeSelection>(initialState.selectedNode)
+  const nodes = EG.toArray(graph)
+  const roots = EG.getRoots(graph)
+  const maxDepth = nodes.reduce((max, node) => Math.max(max, node.metadata.depth), 0)
 
-/**
- * Derived atom for visualization mode
- */
-export const visualizationModeAtom = Writable.make<VisualizationMode>(initialState.visualizationMode)
-
-/**
- * Derived atom for operations list
- */
-export const operationsAtom = Writable.make<ReadonlyArray<string>>([])
-
-/**
- * Derived atom for processing state
- */
-export const isProcessingAtom = Writable.make(false)
-
-/**
- * Derived atom for error state
- */
-export const errorAtom = Writable.make<string | null>(null)
+  return {
+    nodeCount: EG.size(graph),
+    edgeCount: nodes.reduce((sum, node) => sum + EG.getChildren(graph, node.id).length, 0),
+    depth: maxDepth + 1,
+    roots: roots.length
+  }
+})
 
 /**
  * Actions for state updates
+ * These return Effects that can be composed and run
  */
 export const actions = {
-  setInputText: (text: string) => {
-    Writable.set(inputTextAtom, text)
-  },
+  setInputText: (text: string) => Atom.set(inputTextAtom, text),
 
-  setGraph: (graph: EG.EffectGraph<string> | null) => {
-    Writable.set(graphAtom, graph)
-  },
+  setGraph: (graph: EG.EffectGraph<string> | null) => Atom.set(graphAtom, graph),
 
-  selectNode: (nodeId: EG.NodeId | null, path: ReadonlyArray<EG.NodeId> = []) => {
-    Writable.set(selectedNodeAtom, { nodeId, path })
-  },
+  selectNode: (nodeId: EG.NodeId | null, path: ReadonlyArray<EG.NodeId> = []) =>
+    Atom.set(selectedNodeAtom, { nodeId, path }),
 
-  setVisualizationMode: (mode: VisualizationMode) => {
-    Writable.set(visualizationModeAtom, mode)
-  },
+  setVisualizationMode: (mode: VisualizationMode) => Atom.set(visualizationModeAtom, mode),
 
-  addOperation: (operation: string) => {
-    const current = Writable.get(operationsAtom)
-    Writable.set(operationsAtom, [...current, operation])
-  },
+  addOperation: (operation: string) =>
+    Effect.gen(function*() {
+      const current: ReadonlyArray<string> = yield* Atom.get(operationsAtom)
+      yield* Atom.set(operationsAtom, [...current, operation])
+    }),
 
-  clearOperations: () => {
-    Writable.set(operationsAtom, [])
-  },
+  clearOperations: () => Atom.set(operationsAtom, []),
 
-  setProcessing: (isProcessing: boolean) => {
-    Writable.set(isProcessingAtom, isProcessing)
-  },
+  setProcessing: (isProcessing: boolean) => Atom.set(isProcessingAtom, isProcessing),
 
-  setError: (error: string | null) => {
-    Writable.set(errorAtom, error)
-  },
+  setError: (error: string | null) => Atom.set(errorAtom, error),
 
-  reset: () => {
-    Writable.set(inputTextAtom, initialState.inputText)
-    Writable.set(graphAtom, null)
-    Writable.set(selectedNodeAtom, initialState.selectedNode)
-    Writable.set(visualizationModeAtom, initialState.visualizationMode)
-    Writable.set(operationsAtom, [])
-    Writable.set(isProcessingAtom, false)
-    Writable.set(errorAtom, null)
-  }
+  reset: () =>
+    Effect.gen(function*() {
+      yield* Atom.set(inputTextAtom, initialState.inputText)
+      yield* Atom.set(graphAtom, null)
+      yield* Atom.set(selectedNodeAtom, initialState.selectedNode)
+      yield* Atom.set(visualizationModeAtom, initialState.visualizationMode)
+      yield* Atom.set(operationsAtom, [])
+      yield* Atom.set(isProcessingAtom, false)
+      yield* Atom.set(errorAtom, null)
+    })
 }

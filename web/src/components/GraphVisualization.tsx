@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import * as EG from '@adjunct/core/EffectGraph'
 import * as Option from 'effect/Option'
-import { actions } from '../state/atoms'
+import { useAtomSet } from '@effect-atom/atom-react'
+import { selectedNodeAtom } from '../state/atoms'
 import './GraphVisualization.css'
 
 interface GraphVisualizationProps {
@@ -27,6 +28,7 @@ export function GraphVisualization({ graph }: GraphVisualizationProps) {
   const [nodePositions, setNodePositions] = useState<NodePosition[]>([])
   const [hoveredNode, setHoveredNode] = useState<EG.NodeId | null>(null)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
+  const selectNode = useAtomSet(selectedNodeAtom)
 
   // Calculate node positions based on graph structure
   useEffect(() => {
@@ -146,7 +148,7 @@ export function GraphVisualization({ graph }: GraphVisualizationProps) {
       if (!pos) return
 
       const isHovered = hoveredNode === node.id
-      const isRoot = Option.isNone(node.parentId)
+      const isRoot = node.parentId._tag === "None"
 
       // Node circle
       ctx.beginPath()
@@ -157,7 +159,7 @@ export function GraphVisualization({ graph }: GraphVisualizationProps) {
         ctx.fillStyle = 'rgba(212, 191, 255, 0.2)'
         ctx.strokeStyle = '#d4bfff'
       } else {
-        const operation = Option.getOrElse(node.metadata.operation, () => '')
+        const operation = node.metadata.operation._tag === "Some" ? node.metadata.operation.value : ''
         if (operation === 'sentencize') {
           ctx.fillStyle = 'rgba(57, 186, 230, 0.2)'
           ctx.strokeStyle = '#39bae6'
@@ -179,7 +181,7 @@ export function GraphVisualization({ graph }: GraphVisualizationProps) {
       ctx.font = '12px "IBM Plex Mono"'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
-      const label = isRoot ? 'root' : Option.getOrElse(node.metadata.operation, () => 'transform')
+      const label = isRoot ? 'root' : (node.metadata.operation._tag === "Some" ? node.metadata.operation.value : 'transform')
       ctx.fillText(label, pos.x, pos.y - 10)
 
       // Node data preview
@@ -228,7 +230,7 @@ export function GraphVisualization({ graph }: GraphVisualizationProps) {
 
   const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (hoveredNode) {
-      actions.selectNode(hoveredNode, [])
+      selectNode({ nodeId: hoveredNode, path: [] })
     }
   }
 

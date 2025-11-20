@@ -1,5 +1,5 @@
-import { useAtomValue } from '@effect-atom/atom-react'
-import { inputTextAtom, isProcessingAtom, actions } from '../state/atoms'
+import { useAtomValue, useAtomSet } from '@effect-atom/atom-react'
+import { inputTextAtom, isProcessingAtom } from '../state/atoms'
 import './TextInput.css'
 
 /**
@@ -11,9 +11,10 @@ import './TextInput.css'
 export function TextInput() {
   const inputText = useAtomValue(inputTextAtom)
   const isProcessing = useAtomValue(isProcessingAtom)
+  const setInputText = useAtomSet(inputTextAtom)
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    actions.setInputText(e.target.value)
+    setInputText(e.target.value)
   }
 
   const wordCount = inputText.split(/\s+/).filter(w => w.length > 0).length

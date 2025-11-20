@@ -10,6 +10,7 @@
 
 import * as Console from "effect/Console"
 import * as Effect from "effect/Effect"
+import * as Option from "effect/Option"
 import * as EffectGraph from "./EffectGraph.js"
 import * as Formatter from "./Formatter.js"
 import { NLPServiceLive } from "./NLPService.js"
@@ -80,7 +81,8 @@ const complexAnalysisExample = Effect.gen(function*() {
   yield* Console.log(
     EffectGraph.show(
       sentencizedGraph,
-      (data) => typeof data === "string" ? `"${data.substring(0, 50)}${data.length > 50 ? "..." : ""}"` : JSON.stringify(data)
+      (data) =>
+        typeof data === "string" ? `"${data.substring(0, 50)}${data.length > 50 ? "..." : ""}"` : JSON.stringify(data)
     )
   )
   yield* Console.log("")
@@ -127,7 +129,7 @@ const wordCountExample = Effect.gen(function*() {
     const isWord = typeof node.data === "string"
       && node.data.length > 0
       && /\w/.test(node.data)
-      && node.metadata?.operation === "tokenize"
+      && Option.isSome(node.metadata?.operation) && node.metadata?.operation.value === "tokenize"
     const nodeCount = isWord ? 1 : 0
     const childrenTotal = childrenCounts.reduce((a, b) => a + b, 0)
     return nodeCount + childrenTotal

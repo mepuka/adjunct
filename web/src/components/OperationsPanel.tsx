@@ -1,6 +1,6 @@
-import { useAtomValue } from '@effect-atom/atom-react'
-import { inputTextAtom, isProcessingAtom, operationsAtom, actions } from '../state/atoms'
-import { executeOperation } from '../state/graphOperations'
+import { useAtomValue, useAtomSet } from '@effect-atom/atom-react'
+import { inputTextAtom, isProcessingAtom, operationsAtom, graphAtom } from '../state/atoms'
+import { executeOperationMutation } from '../state/graphOperations'
 import './OperationsPanel.css'
 
 /**
@@ -13,22 +13,27 @@ export function OperationsPanel() {
   const inputText = useAtomValue(inputTextAtom)
   const isProcessing = useAtomValue(isProcessingAtom)
   const operations = useAtomValue(operationsAtom)
+  
+  // Get mutation setter - this handles runtime execution automatically
+  const executeOperation = useAtomSet(executeOperationMutation)
+  const setGraph = useAtomSet(graphAtom)
+  const clearOperations = useAtomSet(operationsAtom)
 
-  const handleSentencize = async () => {
-    await executeOperation(inputText, 'sentencize')
+  const handleSentencize = () => {
+    executeOperation({ text: inputText, operation: 'sentencize' })
   }
 
-  const handleTokenize = async () => {
-    await executeOperation(inputText, 'tokenize')
+  const handleTokenize = () => {
+    executeOperation({ text: inputText, operation: 'tokenize' })
   }
 
-  const handleBoth = async () => {
-    await executeOperation(inputText, 'both')
+  const handleBoth = () => {
+    executeOperation({ text: inputText, operation: 'both' })
   }
 
   const handleClear = () => {
-    actions.setGraph(null)
-    actions.clearOperations()
+    setGraph(null)
+    clearOperations([])
   }
 
   return (
