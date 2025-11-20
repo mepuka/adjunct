@@ -14,6 +14,7 @@
 import * as Console from "effect/Console"
 import * as Effect from "effect/Effect"
 import * as EffectGraph from "./EffectGraph.js"
+import * as Formatter from "./Formatter.js"
 import { NLPServiceLive } from "./NLPService.js"
 import * as TextOperations from "./TextOperations.js"
 import * as TypeClass from "./TypeClass.js"
@@ -48,7 +49,7 @@ const basicSentencizationExample = Effect.gen(function*() {
   yield* Console.log(`\n📊 After Sentencization: ${EffectGraph.size(sentencizedGraph)} node(s)`)
 
   // Step 3: Display the graph structure
-  yield* Console.log("\n🌲 Graph Structure:")
+  yield* Console.log(Formatter.section("Graph Structure"))
   yield* Console.log(
     EffectGraph.show(sentencizedGraph, (data) => typeof data === "string" ? `"${data}"` : JSON.stringify(data))
   )
@@ -101,7 +102,7 @@ const multiLevelExample = Effect.gen(function*() {
   yield* Console.log(`📏 Graph depth: ${TypeClass.depth(tokenizedGraph)} levels`)
 
   // Step 4: Display the complete DAG
-  yield* Console.log("\n🌲 Complete DAG Structure:")
+  yield* Console.log(Formatter.section("Complete DAG Structure"))
   yield* Console.log(
     EffectGraph.show(tokenizedGraph, (data) => typeof data === "string" ? `"${data}"` : JSON.stringify(data))
   )
@@ -195,7 +196,7 @@ const pipelineExample = Effect.gen(function*() {
 
   yield* Console.log(`\n📊 Final graph: ${EffectGraph.size(processedGraph)} nodes`)
 
-  yield* Console.log("\n🌲 Result:")
+  yield* Console.log(Formatter.section("Result"))
   yield* Console.log(
     EffectGraph.show(processedGraph, (data) => typeof data === "string" ? `"${data}"` : JSON.stringify(data))
   )
@@ -206,7 +207,7 @@ const pipelineExample = Effect.gen(function*() {
 // =============================================================================
 
 const program = Effect.gen(function*() {
-  yield* Console.log("\n🚀 Effect-DSPy: Text Processing as Graph Transformations\n")
+  yield* Console.log(Formatter.header("Effect-DSPy: Text Processing as Graph Transformations"))
 
   // Run all examples
   yield* basicSentencizationExample
@@ -214,24 +215,14 @@ const program = Effect.gen(function*() {
   yield* catamorphismExample
   yield* pipelineExample
 
-  yield* Console.log("\n\n" + "=".repeat(60))
-  yield* Console.log("✨ All examples completed successfully!")
-  yield* Console.log("=".repeat(60))
-  yield* Console.log(
-    "\n💡 Key Takeaways:"
-  )
-  yield* Console.log(
-    "  • Text operations create child nodes in a DAG"
-  )
-  yield* Console.log(
-    "  • Catamorphisms fold the graph bottom-up"
-  )
-  yield* Console.log(
-    "  • Operations are pure, composable, and type-safe"
-  )
-  yield* Console.log(
-    "  • NLP wrapped in Effect for dependency injection"
-  )
+  yield* Console.log("\n")
+  yield* Console.log(Formatter.success("All examples completed successfully!"))
+  yield* Console.log("\n")
+  yield* Console.log(Formatter.section("Key Takeaways"))
+  yield* Console.log(Formatter.info("Text operations create child nodes in a DAG"))
+  yield* Console.log(Formatter.info("Catamorphisms fold the graph bottom-up"))
+  yield* Console.log(Formatter.info("Operations are pure, composable, and type-safe"))
+  yield* Console.log(Formatter.info("NLP wrapped in Effect for dependency injection"))
   yield* Console.log("")
 })
 

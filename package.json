@@ -26,6 +26,10 @@
     "coverage": "vitest --coverage"
   },
   "dependencies": {
+    "@effect-atom/atom-react": "^0.4.0",
+    "@effect/printer": "^0.47.0",
+    "@effect/printer-ansi": "^0.47.0",
+    "@effect/typeclass": "^0.38.0",
     "effect": "^3.17.7",
     "wink-eng-lite-web-model": "^1.8.1",
     "wink-nlp": "^2.4.0",

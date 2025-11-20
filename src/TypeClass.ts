@@ -206,7 +206,7 @@ export const executeOperation = <A, B, R, E>(
  */
 const getLeafNodes = <A>(graph: EffectGraph<A>): ReadonlyArray<GraphNode<A>> => {
   const allNodes = EG.toArray(graph)
-  return allNodes.filter((node) => EG.getChildren(graph, node.id).length === 0)
+  return allNodes.filter((node: GraphNode<A>) => EG.getChildren(graph, node.id).length === 0)
 }
 
 /**
@@ -312,12 +312,13 @@ export const flatMapOperation = <A, B>(
 /**
  * Traverse the graph and collect all data values
  */
-export const collectData = <A>(graph: EffectGraph<A>): ReadonlyArray<A> => EG.toArray(graph).map((node) => node.data)
+export const collectData = <A>(graph: EffectGraph<A>): ReadonlyArray<A> =>
+  EG.toArray(graph).map((node: GraphNode<A>) => node.data)
 
 /**
  * Get the depth of the graph (longest path from root to leaf)
  */
 export const depth = <A>(graph: EffectGraph<A>): number => {
   const nodes = EG.toArray(graph)
-  return nodes.reduce((max, node) => Math.max(max, node.metadata.depth), 0)
+  return nodes.reduce((max: number, node: GraphNode<A>) => Math.max(max, node.metadata.depth), 0)
 }

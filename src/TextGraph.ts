@@ -8,6 +8,7 @@
 
 import * as Effect from "effect/Effect"
 import * as Graph from "effect/Graph"
+import * as Formatter from "./Formatter.js"
 import * as NLP from "./NLPService.js"
 import * as S from "./Schema.js"
 
@@ -32,8 +33,7 @@ export type MutableTextGraph = Graph.MutableDirectedGraph<S.TextNode, S.TextEdge
 /**
  * Create an empty text graph
  */
-export const empty = (): TextGraph =>
-  Graph.directed<S.TextNode, S.TextEdge>()
+export const empty = (): TextGraph => Graph.directed<S.TextNode, S.TextEdge>()
 
 /**
  * Create a text graph with a single root node
@@ -195,8 +195,7 @@ export const filterNodes = (
 export const dfs = (
   graph: TextGraph,
   start?: ReadonlyArray<Graph.NodeIndex>
-): Graph.NodeWalker<S.TextNode> =>
-  Graph.dfs(graph, start ? { start } : undefined)
+): Graph.NodeWalker<S.TextNode> => Graph.dfs(graph, start ? { start: [...start] } : undefined)
 
 /**
  * Traverse the graph in breadth-first order
@@ -204,22 +203,19 @@ export const dfs = (
 export const bfs = (
   graph: TextGraph,
   start?: ReadonlyArray<Graph.NodeIndex>
-): Graph.NodeWalker<S.TextNode> =>
-  Graph.bfs(graph, start ? { start } : undefined)
+): Graph.NodeWalker<S.TextNode> => Graph.bfs(graph, start ? { start: [...start] } : undefined)
 
 /**
  * Traverse the graph in topological order (parent before children)
  */
 export const topo = (
   graph: TextGraph
-): Graph.NodeWalker<S.TextNode> =>
-  Graph.topo(graph)
+): Graph.NodeWalker<S.TextNode> => Graph.topo(graph)
 
 /**
  * Get all text nodes as an array
  */
-export const toArray = (graph: TextGraph): ReadonlyArray<S.TextNode> =>
-  Array.from(Graph.values(Graph.nodes(graph)))
+export const toArray = (graph: TextGraph): ReadonlyArray<S.TextNode> => Array.from(Graph.values(Graph.nodes(graph)))
 
 // =============================================================================
 // Queries
@@ -228,14 +224,12 @@ export const toArray = (graph: TextGraph): ReadonlyArray<S.TextNode> =>
 /**
  * Count nodes in the graph
  */
-export const nodeCount = (graph: TextGraph): number =>
-  Graph.nodeCount(graph)
+export const nodeCount = (graph: TextGraph): number => Graph.nodeCount(graph)
 
 /**
  * Count edges in the graph
  */
-export const edgeCount = (graph: TextGraph): number =>
-  Graph.edgeCount(graph)
+export const edgeCount = (graph: TextGraph): number => Graph.edgeCount(graph)
 
 /**
  * Find nodes by type
@@ -243,8 +237,7 @@ export const edgeCount = (graph: TextGraph): number =>
 export const findNodesByType = (
   graph: TextGraph,
   type: S.TextNode["type"]
-): ReadonlyArray<Graph.NodeIndex> =>
-  Graph.findNodes(graph, (node) => node.type === type)
+): ReadonlyArray<Graph.NodeIndex> => Graph.findNodes(graph, (node) => node.type === type)
 
 /**
  * Get the root nodes (nodes with no incoming edges)
@@ -268,8 +261,7 @@ export const getLeaves = (graph: TextGraph): ReadonlyArray<Graph.NodeIndex> =>
 export const getChildren = (
   graph: TextGraph,
   nodeIndex: Graph.NodeIndex
-): ReadonlyArray<Graph.NodeIndex> =>
-  Graph.neighbors(graph, nodeIndex)
+): ReadonlyArray<Graph.NodeIndex> => Graph.neighbors(graph, nodeIndex)
 
 // =============================================================================
 // Visualization
@@ -309,30 +301,16 @@ export const toMermaid = (graph: TextGraph): string =>
 
 /**
  * Pretty print the graph structure for debugging
+ * Uses Effect's Printer module for beautiful formatting
  */
-export const show = (graph: TextGraph): string => {
-  const lines: string[] = []
-
-  const visit = (nodeIndex: Graph.NodeIndex, indent: number, visited: Set<number>): void => {
-    if (visited.has(nodeIndex)) return
-    visited.add(nodeIndex)
-
-    const nodeOption = Graph.getNode(graph, nodeIndex)
-    if (nodeOption._tag === "None") return
-
-    const node = nodeOption.value
-    const prefix = "  ".repeat(indent)
-    lines.push(`${prefix}[${node.type}] ${node.text.slice(0, 50)}`)
-
-    const children = getChildren(graph, nodeIndex)
-    children.forEach((child) => visit(child, indent + 1, visited))
+export const show = (
+  graph: TextGraph,
+  format: "text" | "terminal" = "terminal"
+): string => {
+  if (format === "terminal") {
+    return Formatter.formatTextGraphTerminal(graph, getChildren, getRoots)
   }
-
-  const roots = getRoots(graph)
-  const visited = new Set<number>()
-  roots.forEach((root) => visit(root, 0, visited))
-
-  return lines.join("\n")
+  return Formatter.formatTextGraph(graph, getChildren, getRoots)
 }
 
 // =============================================================================
@@ -342,13 +320,11 @@ export const show = (graph: TextGraph): string => {
 /**
  * Check if the graph is acyclic (DAG)
  */
-export const isAcyclic = (graph: TextGraph): boolean =>
-  Graph.isAcyclic(graph)
+export const isAcyclic = (graph: TextGraph): boolean => Graph.isAcyclic(graph)
 
 /**
  * Get strongly connected components
  */
 export const stronglyConnectedComponents = (
   graph: TextGraph
-): ReadonlyArray<ReadonlyArray<Graph.NodeIndex>> =>
-  Graph.stronglyConnectedComponents(graph)
+): ReadonlyArray<ReadonlyArray<Graph.NodeIndex>> => Graph.stronglyConnectedComponents(graph)

@@ -8,8 +8,8 @@
 import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import * as Layer from "effect/Layer"
-import winkNLP from "wink-nlp"
 import model from "wink-eng-lite-web-model"
+import winkNLP from "wink-nlp"
 
 // =============================================================================
 // Service Definition
@@ -25,7 +25,7 @@ interface WinkDocument {
 }
 
 interface WinkCollection {
-  out(): string[]
+  out(): Array<string>
   length(): number
   each(fn: (item: any) => void): void
   itemAt(index: number): any
@@ -176,16 +176,14 @@ export const NLPServiceLive: Layer.Layer<NLPService, never, never> = Layer.effec
  */
 export const sentencize = (
   text: string
-): Effect.Effect<ReadonlyArray<string>, never, NLPService> =>
-  Effect.flatMap(NLPService, (svc) => svc.sentencize(text))
+): Effect.Effect<ReadonlyArray<string>, never, NLPService> => Effect.flatMap(NLPService, (svc) => svc.sentencize(text))
 
 /**
  * Tokenize with the live service
  */
 export const tokenize = (
   text: string
-): Effect.Effect<ReadonlyArray<string>, never, NLPService> =>
-  Effect.flatMap(NLPService, (svc) => svc.tokenize(text))
+): Effect.Effect<ReadonlyArray<string>, never, NLPService> => Effect.flatMap(NLPService, (svc) => svc.tokenize(text))
 
 /**
  * Paragraphize with the live service
@@ -200,8 +198,7 @@ export const paragraphize = (
  */
 export const normalizeWhitespace = (
   text: string
-): Effect.Effect<string, never, NLPService> =>
-  Effect.flatMap(NLPService, (svc) => svc.normalizeWhitespace(text))
+): Effect.Effect<string, never, NLPService> => Effect.flatMap(NLPService, (svc) => svc.normalizeWhitespace(text))
 
 /**
  * Count words with the live service
@@ -215,8 +212,7 @@ export const wordCount = (text: string): Effect.Effect<number, never, NLPService
 export const ngrams = (
   text: string,
   n: number
-): Effect.Effect<ReadonlyArray<string>, never, NLPService> =>
-  Effect.flatMap(NLPService, (svc) => svc.ngrams(text, n))
+): Effect.Effect<ReadonlyArray<string>, never, NLPService> => Effect.flatMap(NLPService, (svc) => svc.ngrams(text, n))
 
 // =============================================================================
 // Testing Support
