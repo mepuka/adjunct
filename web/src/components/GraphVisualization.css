@@ -1,0 +1,68 @@
+.graph-visualization {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  position: relative;
+}
+
+.graph-canvas-container {
+  flex: 1;
+  overflow: auto;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-md);
+  position: relative;
+}
+
+.graph-canvas {
+  display: block;
+  min-width: 100%;
+  min-height: 100%;
+}
+
+.graph-legend {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-sm);
+  margin-top: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid;
+}
+
+/* Scrollbar for canvas container */
+.graph-canvas-container::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.graph-canvas-container::-webkit-scrollbar-track {
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-sm);
+}
+
+.graph-canvas-container::-webkit-scrollbar-thumb {
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-sm);
+}
+
+.graph-canvas-container::-webkit-scrollbar-thumb:hover {
+  background: #2a3140;
+}
