@@ -10,7 +10,16 @@ importers:
     dependencies:
       effect:
         specifier: ^3.17.7
-        version: 3.19.6
+        version: 3.19.5
+      wink-eng-lite-web-model:
+        specifier: ^1.8.1
+        version: 1.8.1
+      wink-nlp:
+        specifier: ^2.4.0
+        version: 2.4.0
+      wink-nlp-utils:
+        specifier: ^2.1.0
+        version: 2.1.0
     devDependencies:
       '@babel/cli':
         specifier: ^7.24.8
@@ -35,7 +44,7 @@ importers:
         version: 0.56.0
       '@effect/vitest':
         specifier: ^0.25.1
-        version: 0.25.1(effect@3.19.6)(vitest@3.2.4(@types/node@22.19.1)(tsx@4.20.6))
+        version: 0.25.1(effect@3.19.5)(vitest@3.2.4(@types/node@22.19.1)(tsx@4.20.6))
       '@eslint/compat':
         specifier: 1.1.1
         version: 1.1.1
@@ -1129,8 +1138,8 @@ packages:
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
-  effect@3.19.6:
-    resolution: {integrity: sha512-Eh1E/CI+xCAcMSDC5DtyE29yWJINC0zwBbwHappQPorjKyS69rCA8qzpsHpfhKnPDYgxdg8zkknii8mZ+6YMQA==}
+  effect@3.19.5:
+    resolution: {integrity: sha512-P/Yml/wuqfIWVg4EH3QWKEqe4txwZVa9tCnlp24mRtIxN/wbn27KLOuDyF0HcKuMYsX/SGw8Lxe0T0Y6q4tvBA==}
 
   electron-to-chromium@1.5.258:
     resolution: {integrity: sha512-rHUggNV5jKQ0sSdWwlaRDkFc3/rRJIVnOSe9yR4zrR07m3ZxhP4N27Hlg8VeJGGYgFTxK5NqDmWI4DSH72vIJg==}
@@ -2389,6 +2398,34 @@ packages:
     engines: {node: '>=8'}
     hasBin: true
 
+  wink-distance@2.0.2:
+    resolution: {integrity: sha512-pyEhUB/OKFYcgOC4J6E+c+gwVA/8qg2s5n49mIcUsJZM5iDSa17uOxRQXR4rvfp+gbj55K/I08FwjFBwb6fq3g==}
+
+  wink-eng-lite-web-model@1.8.1:
+    resolution: {integrity: sha512-M2tSOU/rVNkDj8AS8IoKJaM7apJJjS0cN+hE8CPazfnB4A/ojyc9+7RMPk18UOiIdSyWk7MR6w8z9lWix2l5tA==}
+    engines: {node: '>=16.0.0'}
+
+  wink-helpers@2.0.0:
+    resolution: {integrity: sha512-I/ZzXrHcNRXuoeFJmp2vMVqDI6UCK02Tds1WP4kSGAmx520gjL1BObVzF7d2ps24tyHIly9ngdB2jwhlFUjPvg==}
+
+  wink-jaro-distance@2.0.0:
+    resolution: {integrity: sha512-9bcUaXCi9N8iYpGWbFkf83OsBkg17r4hEyxusEzl+nnReLRPqxhB9YNeRn3g54SYnVRNXP029lY3HDsbdxTAuA==}
+
+  wink-nlp-utils@2.1.0:
+    resolution: {integrity: sha512-b7PcRhEBNxQmsmht70jLOkwYUyie3da4/cgEXL+CumYO5b/nwV+W7fuMXToh5BtGq1RABznmc2TGTp1Qf/JUXg==}
+
+  wink-nlp@1.14.3:
+    resolution: {integrity: sha512-lvY5iCs3T8I34F8WKS70+2P0U9dWLn3vdPf/Z+m2VK14N7OmqnPzmHfh3moHdusajoQ37Em39z0IZB9K4x/96A==}
+
+  wink-nlp@2.4.0:
+    resolution: {integrity: sha512-d02inlNJL0LLNTLoYfkxZYGrqnYDSZV4HI4WpeuyIEfpu7UcUqUW1ZYWr+JTFm4ZR6dQdzOW/FtHEQRO+o/zzA==}
+
+  wink-porter2-stemmer@2.0.1:
+    resolution: {integrity: sha512-0g+RkkqhRXFmSpJQStVXW5N/WsshWpJXsoDRW7DwVkGI2uDT6IBCoq3xdH5p6IHLaC6ygk7RWUsUx4alKxoagQ==}
+
+  wink-tokenizer@5.3.0:
+    resolution: {integrity: sha512-O/yAw0g3FmSgeeQuYAJJfP7fVPB4A6ay0018qASh79aWmIOyPYy4j4r9EQT8xBjicja6lCLvgRVAybmEBaATQA==}
+
   word-wrap@1.2.5:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
     engines: {node: '>=0.10.0'}
@@ -2565,9 +2602,9 @@ snapshots:
 
   '@effect/language-service@0.56.0': {}
 
-  '@effect/vitest@0.25.1(effect@3.19.6)(vitest@3.2.4(@types/node@22.19.1)(tsx@4.20.6))':
+  '@effect/vitest@0.25.1(effect@3.19.5)(vitest@3.2.4(@types/node@22.19.1)(tsx@4.20.6))':
     dependencies:
-      effect: 3.19.6
+      effect: 3.19.5
       vitest: 3.2.4(@types/node@22.19.1)(tsx@4.20.6)
 
   '@emnapi/core@1.7.1':
@@ -3419,7 +3456,7 @@ snapshots:
 
   eastasianwidth@0.2.0: {}
 
-  effect@3.19.6:
+  effect@3.19.5:
     dependencies:
       '@standard-schema/spec': 1.0.0
       fast-check: 3.23.2
@@ -3576,7 +3613,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.47.0(eslint@9.39.1)(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.1):
+  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.47.0(eslint@9.39.1)(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.1))(eslint@9.39.1):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -3626,7 +3663,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.39.1
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.47.0(eslint@9.39.1)(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.1)
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.47.0(eslint@9.39.1)(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.1))(eslint@9.39.1)
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -4939,6 +4976,36 @@ snapshots:
     dependencies:
       siginfo: 2.0.0
       stackback: 0.0.2
+
+  wink-distance@2.0.2:
+    dependencies:
+      wink-helpers: 2.0.0
+      wink-jaro-distance: 2.0.0
+
+  wink-eng-lite-web-model@1.8.1: {}
+
+  wink-helpers@2.0.0: {}
+
+  wink-jaro-distance@2.0.0: {}
+
+  wink-nlp-utils@2.1.0:
+    dependencies:
+      wink-distance: 2.0.2
+      wink-eng-lite-web-model: 1.8.1
+      wink-helpers: 2.0.0
+      wink-nlp: 1.14.3
+      wink-porter2-stemmer: 2.0.1
+      wink-tokenizer: 5.3.0
+
+  wink-nlp@1.14.3: {}
+
+  wink-nlp@2.4.0: {}
+
+  wink-porter2-stemmer@2.0.1: {}
+
+  wink-tokenizer@5.3.0:
+    dependencies:
+      emoji-regex: 9.2.2
 
   word-wrap@1.2.5: {}
 

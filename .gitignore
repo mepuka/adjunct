@@ -5,6 +5,7 @@ node_modules/
 build/
 dist/
 .tsbuildinfo/
+*.tsbuildinfo
 
 # Editor
 .vscode/
@@ -26,3 +27,19 @@ pnpm-debug.log*
 .env
 .env.local
 .env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Temporary files
+tmp/
+
+# Generated docs (keep source controlled EFFECT-DOCS-SEARCH.md)
+docs/
+
+# Scratchpad
+scratchpad/*
+!scratchpad/tsconfig.json
+
+# Direnv
+.direnv/
