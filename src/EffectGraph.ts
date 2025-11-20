@@ -12,8 +12,8 @@
  * - Adjunction: Operations form adjoint functors between categories of nodes
  */
 
-import * as Effect from "effect/Effect"
 import * as Array from "effect/Array"
+import * as Effect from "effect/Effect"
 import * as HashMap from "effect/HashMap"
 import * as HashSet from "effect/HashSet"
 import * as Option from "effect/Option"
@@ -191,10 +191,7 @@ export const getChildren = <A>(
   graph: EffectGraph<A>,
   nodeId: NodeId
 ): ReadonlyArray<GraphNode<A>> => {
-  const childIds = Option.getOrElse(
-    HashMap.get(graph.children, nodeId),
-    () => HashSet.empty<NodeId>()
-  )
+  const childIds = Option.getOrElse(HashMap.get(graph.children, nodeId), () => HashSet.empty<NodeId>())
 
   return Array.fromIterable(childIds).flatMap((childId: NodeId) =>
     Option.match(getNode(graph, childId), {
@@ -252,7 +249,7 @@ export const cata = <A, B>(
   const memo = new Map<NodeId, B>()
 
   const go = (nodeId: NodeId): Effect.Effect<B, never, never> =>
-    Effect.gen(function* () {
+    Effect.gen(function*() {
       // Check memoization
       if (memo.has(nodeId)) {
         return memo.get(nodeId)!
@@ -299,14 +296,14 @@ export const ana = <A, B>(
   seed: B,
   coalgebra: GraphCoalgebra<A, B>
 ): Effect.Effect<EffectGraph<A>, never, never> =>
-  Effect.gen(function* () {
+  Effect.gen(function*() {
     let graph = empty<A>()
 
     const go = (
       currentSeed: B,
       parentId: Option.Option<NodeId>
     ): Effect.Effect<NodeId, never, never> =>
-      Effect.gen(function* () {
+      Effect.gen(function*() {
         const [data, childSeeds] = yield* coalgebra(currentSeed)
         const node = makeNode(data, parentId)
         graph = addNode(graph, node)
@@ -353,7 +350,7 @@ export const map = <A, B>(
 export const toArray = <A>(
   graph: EffectGraph<A>
 ): ReadonlyArray<GraphNode<A>> => {
-  const result: GraphNode<A>[] = []
+  const result: Array<GraphNode<A>> = []
   const visited = new Set<NodeId>()
 
   const visit = (nodeId: NodeId): void => {
@@ -364,20 +361,19 @@ export const toArray = <A>(
     if (Option.isNone(node)) return
 
     const children = getChildren(graph, nodeId)
-    children.forEach(child => visit(child.id))
+    children.forEach((child) => visit(child.id))
 
     result.push(Option.getOrThrow(node))
   }
 
-  getRoots(graph).forEach(root => visit(root.id))
+  getRoots(graph).forEach((root) => visit(root.id))
   return result
 }
 
 /**
  * Get the size (number of nodes) in the graph
  */
-export const size = <A>(graph: EffectGraph<A>): number =>
-  HashMap.size(graph.nodes)
+export const size = <A>(graph: EffectGraph<A>): number => HashMap.size(graph.nodes)
 
 /**
  * Pretty print the graph structure
@@ -386,7 +382,7 @@ export const show = <A>(
   graph: EffectGraph<A>,
   showData: (a: A) => string
 ): string => {
-  const lines: string[] = []
+  const lines: Array<string> = []
 
   const visit = (nodeId: NodeId, indent: number): void => {
     const node = getNode(graph, nodeId)
