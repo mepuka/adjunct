@@ -4,12 +4,12 @@
  * Demonstrates the core graph operations engine with a simple NLP pipeline.
  */
 
+import * as Duration from "effect/Duration"
 import * as Effect from "effect/Effect"
 import * as Layer from "effect/Layer"
-import * as Duration from "effect/Duration"
 import * as EG from "../src/EffectGraph.js"
-import * as GraphOp from "../src/GraphOperations/index.js"
 import * as Catalog from "../src/GraphOperations/Catalog.js"
+import * as GraphOp from "../src/GraphOperations/index.js"
 import { NLPServiceLive } from "../src/NLPService.js"
 
 // Combine all layers
@@ -20,7 +20,7 @@ const AppLayer = Layer.mergeAll(
 )
 
 // Demo program
-const program = Effect.gen(function* () {
+const program = Effect.gen(function*() {
   console.log("=".repeat(60))
   console.log("Graph Operations Executor Demo")
   console.log("=".repeat(60))

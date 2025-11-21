@@ -12,16 +12,17 @@
  */
 
 import * as Context from "effect/Context"
+import * as Duration from "effect/Duration"
 import * as Effect from "effect/Effect"
 import * as Layer from "effect/Layer"
 import * as Option from "effect/Option"
-import * as Duration from "effect/Duration"
 import type { EffectGraph, GraphNode } from "../EffectGraph.js"
 import * as EG from "../EffectGraph.js"
+import type { StorageError, ValidationError } from "./Errors.js"
+import { ExecutionError } from "./Errors.js"
 import type { GraphOperation } from "./Operation.js"
 import * as ResultStore from "./ResultStore.js"
 import * as Types from "./Types.js"
-import { ExecutionError, ValidationError } from "./Errors.js"
 
 // =============================================================================
 // GraphExecutor Interface
@@ -94,15 +95,15 @@ const executeSequential = <A, B, R, E>(
     readonly errors: ReadonlyArray<E>
     readonly metrics: Types.ExecutionMetrics
   },
-  never,
+  StorageError,
   R | ResultStore.ResultStore
 > =>
-  Effect.gen(function* () {
+  Effect.gen(function*() {
     const store = yield* ResultStore.ResultStore
     const startTime = Date.now()
 
-    let allNewNodes: GraphNode<B>[] = []
-    let allErrors: E[] = []
+    const allNewNodes: Array<GraphNode<B>> = []
+    const allErrors: Array<E> = []
     let cacheHits = 0
     let cacheMisses = 0
 
@@ -114,8 +115,12 @@ const executeSequential = <A, B, R, E>(
 
         if (Option.isSome(cached)) {
           cacheHits++
-          allNewNodes.push(...cached.value.newNodes)
-          allErrors.push(...cached.value.errors)
+          for (const node of cached.value.newNodes) {
+            allNewNodes.push(node)
+          }
+          for (const err of cached.value.errors) {
+            allErrors.push(err)
+          }
           continue
         }
 
@@ -131,7 +136,9 @@ const executeSequential = <A, B, R, E>(
       } else {
         // Operation succeeded - collect new nodes
         const newNodes = result.right
-        allNewNodes.push(...newNodes)
+        for (const node of newNodes) {
+          allNewNodes.push(node)
+        }
 
         // Cache result if enabled
         if (cache) {
@@ -179,17 +186,17 @@ const executeParallel = <A, B, R, E>(
     readonly errors: ReadonlyArray<E>
     readonly metrics: Types.ExecutionMetrics
   },
-  never,
+  StorageError,
   R | ResultStore.ResultStore
 > =>
-  Effect.gen(function* () {
+  Effect.gen(function*() {
     const store = yield* ResultStore.ResultStore
     const startTime = Date.now()
 
     // Process nodes in parallel with concurrency limit
     const results = yield* Effect.all(
       leafNodes.map((leafNode) =>
-        Effect.gen(function* () {
+        Effect.gen(function*() {
           // Check cache
           if (cache) {
             const key = ResultStore.ResultKey.make(operation.name, leafNode.id)
@@ -209,7 +216,7 @@ const executeParallel = <A, B, R, E>(
 
           if (result._tag === "Left") {
             return {
-              newNodes: [] as GraphNode<B>[],
+              newNodes: [] as Array<GraphNode<B>>,
               errors: [result.left as E],
               fromCache: false
             }
@@ -231,7 +238,7 @@ const executeParallel = <A, B, R, E>(
 
             return {
               newNodes,
-              errors: [] as E[],
+              errors: [] as Array<E>,
               fromCache: false
             }
           }
@@ -274,7 +281,7 @@ const makeGraphExecutor = Effect.sync(() =>
       operation: GraphOperation<A, B, R, E>,
       options: Partial<Types.ExecutionOptions> = {}
     ) =>
-      Effect.gen(function* () {
+      Effect.gen(function*() {
         const opts = { ...Types.ExecutionOptions.default(), ...options }
         const executionId = Types.ExecutionId.generate()
 
@@ -283,11 +290,13 @@ const makeGraphExecutor = Effect.sync(() =>
 
         if (leafNodes.length === 0) {
           // No leaf nodes - return empty result
-          return Types.OperationResult.make(
+          const emptyNodes: ReadonlyArray<GraphNode<B>> = []
+          const emptyErrors: ReadonlyArray<E> = []
+          return Types.OperationResult.make<A, B, E>(
             executionId,
             graph,
-            [],
-            [],
+            emptyNodes,
+            emptyErrors,
             Types.ExecutionMetrics.empty()
           )
         }
@@ -343,23 +352,42 @@ const makeGraphExecutor = Effect.sync(() =>
           result.metrics
         )
       }).pipe(
-        Effect.catchAll((error) =>
-          Effect.fail(
-            error instanceof ExecutionError || error instanceof ValidationError
-              ? error
-              : new ExecutionError({
-                  message: "Execution failed",
-                  cause: error
-                })
-          )
-        )
+        Effect.mapError((error: unknown) => {
+          // Map StorageError to ExecutionError
+          if (
+            error &&
+            typeof error === "object" &&
+            "_tag" in error &&
+            (error as { _tag: string })._tag === "StorageError"
+          ) {
+            return new ExecutionError({
+              message: "Storage operation failed",
+              cause: error
+            })
+          }
+          // Check if error is already a known error type
+          if (
+            error &&
+            typeof error === "object" &&
+            "_tag" in error
+          ) {
+            const tag = (error as { _tag: string })._tag
+            if (tag === "ExecutionError" || tag === "ValidationError") {
+              return error as ExecutionError | ValidationError
+            }
+          }
+          return new ExecutionError({
+            message: "Execution failed",
+            cause: error
+          })
+        })
       ),
 
     validate: <A, B, R, E>(
       graph: EffectGraph<A>,
       operation: GraphOperation<A, B, R, E>
     ) =>
-      Effect.gen(function* () {
+      Effect.gen(function*() {
         const leafNodes = getLeafNodes(graph)
 
         if (leafNodes.length === 0) {
@@ -397,7 +425,7 @@ const makeGraphExecutor = Effect.sync(() =>
       graph: EffectGraph<A>,
       operation: GraphOperation<A, B, R, E>
     ) =>
-      Effect.gen(function* () {
+      Effect.gen(function*() {
         const leafNodes = getLeafNodes(graph)
 
         if (leafNodes.length === 0) {
@@ -425,5 +453,6 @@ export const GraphExecutorLive: Layer.Layer<
 /**
  * Test layer for GraphExecutor (with test result store)
  */
-export const GraphExecutorTest: Layer.Layer<GraphExecutor, never, never> =
-  GraphExecutorLive.pipe(Layer.provide(ResultStore.ResultStoreTest))
+export const GraphExecutorTest: Layer.Layer<GraphExecutor, never, never> = GraphExecutorLive.pipe(
+  Layer.provide(ResultStore.ResultStoreTest)
+)

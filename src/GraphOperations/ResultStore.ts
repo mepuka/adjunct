@@ -13,8 +13,8 @@ import * as Layer from "effect/Layer"
 import * as Option from "effect/Option"
 import * as Ref from "effect/Ref"
 import type { NodeId } from "../EffectGraph.js"
-import type { OperationResult } from "./Types.js"
 import { StorageError } from "./Errors.js"
+import type { OperationResult } from "./Types.js"
 
 // =============================================================================
 // Result Store Interface
@@ -114,7 +114,7 @@ export const ResultStore = Context.GenericTag<ResultStore>("ResultStore")
 /**
  * In-memory result store using Effect Ref
  */
-const makeResultStore = Effect.gen(function* () {
+const makeResultStore = Effect.gen(function*() {
   // Mutable reference to the store map
   const storeRef = yield* Ref.make<Map<string, StoredResult<any, any, any>>>(
     new Map()
@@ -122,7 +122,7 @@ const makeResultStore = Effect.gen(function* () {
 
   return ResultStore.of({
     store: <A, B, E>(key: ResultKey, result: OperationResult<A, B, E>) =>
-      Effect.gen(function* () {
+      Effect.gen(function*() {
         const keyStr = ResultKey.toString(key)
         const stored: StoredResult<A, B, E> = {
           key,
@@ -137,13 +137,11 @@ const makeResultStore = Effect.gen(function* () {
           return newMap
         })
       }).pipe(
-        Effect.catchAll((error) =>
-          Effect.fail(new StorageError({ operation: "store", cause: error }))
-        )
+        Effect.catchAll((error) => Effect.fail(new StorageError({ operation: "store", cause: error })))
       ),
 
     get: <A, B, E>(key: ResultKey) =>
-      Effect.gen(function* () {
+      Effect.gen(function*() {
         const keyStr = ResultKey.toString(key)
         const map = yield* Ref.get(storeRef)
         const stored = map.get(keyStr)
@@ -172,14 +170,14 @@ const makeResultStore = Effect.gen(function* () {
       ),
 
     has: (key: ResultKey) =>
-      Effect.gen(function* () {
+      Effect.gen(function*() {
         const keyStr = ResultKey.toString(key)
         const map = yield* Ref.get(storeRef)
         return map.has(keyStr)
       }),
 
     delete: (key: ResultKey) =>
-      Effect.gen(function* () {
+      Effect.gen(function*() {
         const keyStr = ResultKey.toString(key)
 
         yield* Ref.update(storeRef, (map) => {
@@ -188,22 +186,18 @@ const makeResultStore = Effect.gen(function* () {
           return newMap
         })
       }).pipe(
-        Effect.catchAll((error) =>
-          Effect.fail(new StorageError({ operation: "delete", cause: error }))
-        )
+        Effect.catchAll((error) => Effect.fail(new StorageError({ operation: "delete", cause: error })))
       ),
 
     clear: () =>
-      Effect.gen(function* () {
+      Effect.gen(function*() {
         yield* Ref.set(storeRef, new Map())
       }).pipe(
-        Effect.catchAll((error) =>
-          Effect.fail(new StorageError({ operation: "delete", cause: error }))
-        )
+        Effect.catchAll((error) => Effect.fail(new StorageError({ operation: "delete", cause: error })))
       ),
 
     stats: () =>
-      Effect.gen(function* () {
+      Effect.gen(function*() {
         const map = yield* Ref.get(storeRef)
         const entries = Array.from(map.values())
 
@@ -219,7 +213,7 @@ const makeResultStore = Effect.gen(function* () {
       }),
 
     gc: (olderThanMs: number) =>
-      Effect.gen(function* () {
+      Effect.gen(function*() {
         const cutoff = Date.now() - olderThanMs
         let deleted = 0
 
@@ -239,9 +233,7 @@ const makeResultStore = Effect.gen(function* () {
 
         return deleted
       }).pipe(
-        Effect.catchAll((error) =>
-          Effect.fail(new StorageError({ operation: "delete", cause: error }))
-        )
+        Effect.catchAll((error) => Effect.fail(new StorageError({ operation: "delete", cause: error })))
       )
   })
 })
@@ -249,11 +241,9 @@ const makeResultStore = Effect.gen(function* () {
 /**
  * Live layer for ResultStore (in-memory)
  */
-export const ResultStoreLive: Layer.Layer<ResultStore, never, never> =
-  Layer.effect(ResultStore, makeResultStore)
+export const ResultStoreLive: Layer.Layer<ResultStore, never, never> = Layer.effect(ResultStore, makeResultStore)
 
 /**
  * Test layer for ResultStore (starts empty)
  */
-export const ResultStoreTest: Layer.Layer<ResultStore, never, never> =
-  ResultStoreLive
+export const ResultStoreTest: Layer.Layer<ResultStore, never, never> = ResultStoreLive

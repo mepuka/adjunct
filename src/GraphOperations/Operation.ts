@@ -11,12 +11,7 @@ import * as Effect from "effect/Effect"
 import * as Option from "effect/Option"
 import type { GraphNode } from "../EffectGraph.js"
 import * as EG from "../EffectGraph.js"
-import type {
-  ExecutionMetrics,
-  OperationCategory,
-  OperationCost,
-  ValidationResult
-} from "./Types.js"
+import type { OperationCategory, OperationCost, ValidationResult } from "./Types.js"
 import * as Types from "./Types.js"
 
 // =============================================================================
@@ -105,11 +100,9 @@ export const make = <A, B, R = never, E = never>(config: {
   description: config.description,
   category: config.category,
   apply: config.apply,
-  validate:
-    config.validate ??
+  validate: config.validate ??
     ((_node) => Effect.succeed(Types.ValidationResult.valid())),
-  estimateCost:
-    config.estimateCost ?? ((_node) => Effect.succeed(Types.OperationCost.zero()))
+  estimateCost: config.estimateCost ?? ((_node) => Effect.succeed(Types.OperationCost.zero()))
 })
 
 /**
@@ -126,11 +119,7 @@ export const pure = <A, B>(config: {
     description: config.description,
     category: config.category,
     apply: (node) =>
-      Effect.sync(() =>
-        config.f(node.data).map((b) =>
-          EG.makeNode(b, Option.some(node.id), Option.some(config.name))
-        )
-      )
+      Effect.sync(() => config.f(node.data).map((b) => EG.makeNode(b, Option.some(node.id), Option.some(config.name))))
   })
 
 /**

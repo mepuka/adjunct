@@ -17,12 +17,9 @@
  * - Monoids enable parallel and incremental aggregation
  */
 
-import * as Effect from "effect/Effect"
-import * as Graph from "effect/Graph"
-import * as Option from "effect/Option"
-import * as Array from "effect/Array"
-import * as Chunk from "effect/Chunk"
-import * as Stream from "effect/Stream"
+import type { Option } from "effect"
+import { Array, Effect, Graph, Stream } from "effect"
+import type * as Chunk from "effect/Chunk"
 import { pipe } from "effect/Function"
 
 // =============================================================================
@@ -168,8 +165,7 @@ export const filterEdges = <A, E>(
 export const findNodes = <A, E>(
   graph: DirectedGraph<A, E>,
   predicate: (node: A) => boolean
-): ReadonlyArray<NodeIndex> =>
-  Graph.findNodes(graph, predicate)
+): ReadonlyArray<NodeIndex> => Graph.findNodes(graph, predicate)
 
 // =============================================================================
 // Folds and Aggregations (Monoid Homomorphisms)
@@ -228,8 +224,7 @@ export const foldTraversal = <A, E, B>(
  */
 export const collectNodes = <A, E>(
   graph: DirectedGraph<A, E>
-): ReadonlyArray<A> =>
-  Array.fromIterable(Graph.values(Graph.nodes(graph)))
+): ReadonlyArray<A> => Array.fromIterable(Graph.values(Graph.nodes(graph)))
 
 /**
  * Collect nodes in traversal order
@@ -297,8 +292,7 @@ export const getLeaves = <A, E>(
 export const getChildren = <A, E>(
   graph: DirectedGraph<A, E>,
   nodeIndex: NodeIndex
-): ReadonlyArray<NodeIndex> =>
-  Graph.neighbors(graph, nodeIndex)
+): ReadonlyArray<NodeIndex> => Graph.neighbors(graph, nodeIndex)
 
 /**
  * Get node data by index
@@ -306,8 +300,7 @@ export const getChildren = <A, E>(
 export const getNode = <A, E>(
   graph: DirectedGraph<A, E>,
   nodeIndex: NodeIndex
-): Option.Option<A> =>
-  Graph.getNode(graph, nodeIndex)
+): Option.Option<A> => Graph.getNode(graph, nodeIndex)
 
 // =============================================================================
 // Search Operations (Adjoint Functors: Query ⊣ Index)
@@ -362,8 +355,7 @@ export const buildIndex = <A, E, K>(
 export const queryIndex = <K, A>(
   searchIndex: SearchIndex<K, A>,
   key: K
-): ReadonlyArray<NodeIndex> =>
-  searchIndex.index.get(key) ?? []
+): ReadonlyArray<NodeIndex> => searchIndex.index.get(key) ?? []
 
 /**
  * Multi-key query with union semantics
@@ -600,40 +592,35 @@ export const batchNodes = <A, E>(
  */
 export const isAcyclic = <A, E>(
   graph: DirectedGraph<A, E>
-): boolean =>
-  Graph.isAcyclic(graph)
+): boolean => Graph.isAcyclic(graph)
 
 /**
  * Get strongly connected components
  */
 export const stronglyConnectedComponents = <A, E>(
   graph: DirectedGraph<A, E>
-): ReadonlyArray<ReadonlyArray<NodeIndex>> =>
-  Graph.stronglyConnectedComponents(graph)
+): ReadonlyArray<ReadonlyArray<NodeIndex>> => Graph.stronglyConnectedComponents(graph)
 
 /**
  * Count nodes in the graph
  */
 export const nodeCount = <A, E>(
   graph: DirectedGraph<A, E>
-): number =>
-  Graph.nodeCount(graph)
+): number => Graph.nodeCount(graph)
 
 /**
  * Count edges in the graph
  */
 export const edgeCount = <A, E>(
   graph: DirectedGraph<A, E>
-): number =>
-  Graph.edgeCount(graph)
+): number => Graph.edgeCount(graph)
 
 /**
  * Check if the graph is empty (no nodes)
  */
 export const isEmpty = <A, E>(
   graph: DirectedGraph<A, E>
-): boolean =>
-  nodeCount(graph) === 0
+): boolean => nodeCount(graph) === 0
 
 // =============================================================================
 // Utilities
@@ -642,8 +629,7 @@ export const isEmpty = <A, E>(
 /**
  * Create an empty directed graph
  */
-export const empty = <A, E>(): DirectedGraph<A, E> =>
-  Graph.directed<A, E>()
+export const empty = <A, E>(): DirectedGraph<A, E> => Graph.directed<A, E>()
 
 /**
  * Create a graph with a single node

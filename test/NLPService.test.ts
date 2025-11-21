@@ -2,8 +2,8 @@
  * Tests for NLPService using Wink NLP
  */
 
+import { describe, expect, test } from "@effect/vitest"
 import * as Effect from "effect/Effect"
-import { describe, expect, test } from "vitest"
 import * as NLP from "../src/NLPService.js"
 
 describe("Sentencize", () => {
