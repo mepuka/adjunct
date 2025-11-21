@@ -10,7 +10,8 @@ import * as Effect from "effect/Effect"
 import * as Layer from "effect/Layer"
 import model from "wink-eng-lite-web-model"
 import winkNLP from "wink-nlp"
-import nlpUtils from "wink-nlp-utils"
+// @ts-ignore - wink-nlp-utils doesn't have type definitions
+import * as nlpUtils from "wink-nlp-utils"
 // @ts-ignore - wink-distance doesn't have type definitions
 import distance from "wink-distance"
 
@@ -233,7 +234,7 @@ const makeNLPService = Effect.sync(() => {
    * Uses removeWords to check - if the token is filtered out, it's a stop word
    */
   const isStopWord = (token: string): boolean => {
-    const filtered = nlpUtils.tokens.removeWords([token])
+    const filtered = (nlpUtils.tokens as any).removeWords([token])
     return filtered.length === 0
   }
 
@@ -247,32 +248,32 @@ const makeNLPService = Effect.sync(() => {
   }
 
   const removePunctuationImpl = (text: string): string =>
-    nlpUtils.string.removePunctuations(text)
+    (nlpUtils.string as any).removePunctuations(text)
 
   const removeExtraSpacesImpl = (text: string): string =>
-    nlpUtils.string.removeExtraSpaces(text)
+    (nlpUtils.string as any).removeExtraSpaces(text)
 
   const stemImpl = (tokens: ReadonlyArray<string>): ReadonlyArray<string> =>
-    tokens.map((token) => nlpUtils.string.stem(token))
+    tokens.map((token) => (nlpUtils.string as any).stem(token))
 
   const removeStopWordsImpl = (
     tokens: ReadonlyArray<string>
   ): ReadonlyArray<string> =>
-    nlpUtils.tokens.removeWords(tokens as any) as ReadonlyArray<string>
+    (nlpUtils.tokens as any).removeWords(tokens as any) as ReadonlyArray<string>
 
   const bagOfWordsImpl = (
     tokens: ReadonlyArray<string>
   ): BagOfWords => {
-    const bow = nlpUtils.tokens.bagOfWords(tokens as any)
+    const bow = (nlpUtils.tokens as any).bagOfWords(tokens as any)
     // Convert plain object to Map
     return new Map(Object.entries(bow))
   }
 
   const stringSimilarityImpl = (s1: string, s2: string): number => {
-    // wink-distance returns distance (0 = identical, higher = more different)
-    // Convert to similarity (1 = identical, 0 = completely different)
-    const dist = distance.string.jaro(s1, s2)
-    return 1 - dist
+    // wink-distance.string.jaro returns similarity in [0, 1]
+    // where 1 = identical, 0 = completely different
+    // No inversion needed - use the value directly
+    return distance.string.jaro(s1, s2)
   }
 
   return {

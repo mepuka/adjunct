@@ -55,39 +55,33 @@ export const formatTextGraph = (
   getRoots: (graph: Graph.DirectedGraph<S.TextNode, S.TextEdge>) => ReadonlyArray<Graph.NodeIndex>,
   config: FormatConfig = { format: "text", width: 80, indent: 2 }
 ): string => {
-  // Build depth map using DFS from roots
+  // Build depth map using BFS from roots (O(V + E), handles DAGs correctly)
   const depthMap = new Map<Graph.NodeIndex, number>()
   const roots = getRoots(graph)
 
-  const calculateDepth = (nodeIndex: Graph.NodeIndex, visited: Set<number>): number => {
-    if (visited.has(nodeIndex)) {
-      return depthMap.get(nodeIndex) ?? 0
-    }
-    visited.add(nodeIndex)
+  // Initialize roots at depth 0
+  const queue: Array<Graph.NodeIndex> = []
+  roots.forEach((rootIdx) => {
+    depthMap.set(rootIdx, 0)
+    queue.push(rootIdx)
+  })
 
-    // Check if it's a root
-    if (roots.includes(nodeIndex)) {
-      depthMap.set(nodeIndex, 0)
-      return 0
-    }
+  // BFS traversal: assign depth as max(parent depths) + 1
+  while (queue.length > 0) {
+    const current = queue.shift()!
+    const currentDepth = depthMap.get(current) ?? 0
 
-    // Find parent (node that has this as a child)
-    let depth = 0
-    for (const [idx] of Graph.nodes(graph)) {
-      const children = getChildren(graph, idx)
-      if (children.includes(nodeIndex)) {
-        depth = calculateDepth(idx, visited) + 1
-        break
+    const children = getChildren(graph, current)
+    children.forEach((childIdx) => {
+      const newDepth = currentDepth + 1
+      const existingDepth = depthMap.get(childIdx)
+
+      // For DAGs with multiple parents, take the maximum depth
+      if (existingDepth === undefined || newDepth > existingDepth) {
+        depthMap.set(childIdx, newDepth)
+        queue.push(childIdx)
       }
-    }
-    depthMap.set(nodeIndex, depth)
-    return depth
-  }
-
-  // Calculate depths for all nodes
-  const visited = new Set<number>()
-  for (const [idx] of Graph.nodes(graph)) {
-    calculateDepth(idx, visited)
+    })
   }
 
   // Use DFS walker to traverse and format
@@ -134,36 +128,33 @@ export const formatTextGraphHtml = (
   getRoots: (graph: Graph.DirectedGraph<S.TextNode, S.TextEdge>) => ReadonlyArray<Graph.NodeIndex>,
   _config: FormatConfig = { format: "html", width: 80, indent: 2 }
 ): string => {
-  // Build depth map for proper indentation
+  // Build depth map using BFS from roots (O(V + E), handles DAGs correctly)
   const depthMap = new Map<Graph.NodeIndex, number>()
   const roots = getRoots(graph)
 
-  const calculateDepth = (nodeIndex: Graph.NodeIndex, visited: Set<number>): number => {
-    if (visited.has(nodeIndex)) {
-      return depthMap.get(nodeIndex) ?? 0
-    }
-    visited.add(nodeIndex)
+  // Initialize roots at depth 0
+  const queue: Array<Graph.NodeIndex> = []
+  roots.forEach((rootIdx) => {
+    depthMap.set(rootIdx, 0)
+    queue.push(rootIdx)
+  })
 
-    if (roots.includes(nodeIndex)) {
-      depthMap.set(nodeIndex, 0)
-      return 0
-    }
+  // BFS traversal: assign depth as max(parent depths) + 1
+  while (queue.length > 0) {
+    const current = queue.shift()!
+    const currentDepth = depthMap.get(current) ?? 0
 
-    let depth = 0
-    for (const [idx] of Graph.nodes(graph)) {
-      const children = getChildren(graph, idx)
-      if (children.includes(nodeIndex)) {
-        depth = calculateDepth(idx, visited) + 1
-        break
+    const children = getChildren(graph, current)
+    children.forEach((childIdx) => {
+      const newDepth = currentDepth + 1
+      const existingDepth = depthMap.get(childIdx)
+
+      // For DAGs with multiple parents, take the maximum depth
+      if (existingDepth === undefined || newDepth > existingDepth) {
+        depthMap.set(childIdx, newDepth)
+        queue.push(childIdx)
       }
-    }
-    depthMap.set(nodeIndex, depth)
-    return depth
-  }
-
-  const visited = new Set<number>()
-  for (const [idx] of Graph.nodes(graph)) {
-    calculateDepth(idx, visited)
+    })
   }
 
   // Build HTML using Doc for proper structure
@@ -316,36 +307,33 @@ export const formatTextGraphMarkdown = (
   const lines: Array<string> = []
   lines.push("# Text Processing Graph\n")
 
-  // Build depth map
+  // Build depth map using BFS from roots (O(V + E), handles DAGs correctly)
   const depthMap = new Map<Graph.NodeIndex, number>()
   const roots = getRoots(graph)
 
-  const calculateDepth = (nodeIndex: Graph.NodeIndex, visited: Set<number>): number => {
-    if (visited.has(nodeIndex)) {
-      return depthMap.get(nodeIndex) ?? 0
-    }
-    visited.add(nodeIndex)
+  // Initialize roots at depth 0
+  const queue: Array<Graph.NodeIndex> = []
+  roots.forEach((rootIdx) => {
+    depthMap.set(rootIdx, 0)
+    queue.push(rootIdx)
+  })
 
-    if (roots.includes(nodeIndex)) {
-      depthMap.set(nodeIndex, 0)
-      return 0
-    }
+  // BFS traversal: assign depth as max(parent depths) + 1
+  while (queue.length > 0) {
+    const current = queue.shift()!
+    const currentDepth = depthMap.get(current) ?? 0
 
-    let depth = 0
-    for (const [idx] of Graph.nodes(graph)) {
-      const children = getChildren(graph, idx)
-      if (children.includes(nodeIndex)) {
-        depth = calculateDepth(idx, visited) + 1
-        break
+    const children = getChildren(graph, current)
+    children.forEach((childIdx) => {
+      const newDepth = currentDepth + 1
+      const existingDepth = depthMap.get(childIdx)
+
+      // For DAGs with multiple parents, take the maximum depth
+      if (existingDepth === undefined || newDepth > existingDepth) {
+        depthMap.set(childIdx, newDepth)
+        queue.push(childIdx)
       }
-    }
-    depthMap.set(nodeIndex, depth)
-    return depth
-  }
-
-  const visited = new Set<number>()
-  for (const [idx] of Graph.nodes(graph)) {
-    calculateDepth(idx, visited)
+    })
   }
 
   // Use DFS walker to traverse and format
@@ -409,36 +397,33 @@ export const formatTextGraphTerminal = (
     }
   }
 
-  // Build depth map for indentation
+  // Build depth map using BFS from roots (O(V + E), handles DAGs correctly)
   const depthMap = new Map<Graph.NodeIndex, number>()
   const roots = getRoots(graph)
 
-  const calculateDepth = (nodeIndex: Graph.NodeIndex, visited: Set<number>): number => {
-    if (visited.has(nodeIndex)) {
-      return depthMap.get(nodeIndex) ?? 0
-    }
-    visited.add(nodeIndex)
+  // Initialize roots at depth 0
+  const queue: Array<Graph.NodeIndex> = []
+  roots.forEach((rootIdx) => {
+    depthMap.set(rootIdx, 0)
+    queue.push(rootIdx)
+  })
 
-    if (roots.includes(nodeIndex)) {
-      depthMap.set(nodeIndex, 0)
-      return 0
-    }
+  // BFS traversal: assign depth as max(parent depths) + 1
+  while (queue.length > 0) {
+    const current = queue.shift()!
+    const currentDepth = depthMap.get(current) ?? 0
 
-    let depth = 0
-    for (const [idx] of Graph.nodes(graph)) {
-      const children = getChildren(graph, idx)
-      if (children.includes(nodeIndex)) {
-        depth = calculateDepth(idx, visited) + 1
-        break
+    const children = getChildren(graph, current)
+    children.forEach((childIdx) => {
+      const newDepth = currentDepth + 1
+      const existingDepth = depthMap.get(childIdx)
+
+      // For DAGs with multiple parents, take the maximum depth
+      if (existingDepth === undefined || newDepth > existingDepth) {
+        depthMap.set(childIdx, newDepth)
+        queue.push(childIdx)
       }
-    }
-    depthMap.set(nodeIndex, depth)
-    return depth
-  }
-
-  const visited = new Set<number>()
-  for (const [idx] of Graph.nodes(graph)) {
-    calculateDepth(idx, visited)
+    })
   }
 
   // Use DFS walker to traverse and format with colors
