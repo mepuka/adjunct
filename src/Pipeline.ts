@@ -189,12 +189,14 @@ export const parallelFeaturePipeline = (
     // Normalize once
     const normalized = yield* nlp.normalizeWhitespace(text)
 
-    // Execute all feature extractions in parallel
-    const [tokens, bigrams, trigrams, bow] = yield* Effect.all([
-      nlp.tokenize(normalized),
+    // Tokenize once and reuse the result to avoid duplicate work
+    const tokens = yield* nlp.tokenize(normalized)
+
+    // Execute n-gram extractions and BOW computation in parallel
+    const [bigrams, trigrams, bow] = yield* Effect.all([
       nlp.ngrams(normalized, 2),
       nlp.ngrams(normalized, 3),
-      Effect.flatMap(nlp.tokenize(normalized), (toks) => nlp.bagOfWords(toks))
+      nlp.bagOfWords(tokens) // Reuse tokens instead of re-tokenizing
     ])
 
     return {

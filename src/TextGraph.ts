@@ -99,14 +99,17 @@ export const fromDocument = (
 
 /**
  * Add child nodes to a parent node in the graph
+ * Validates that the resulting graph remains acyclic
+ * @throws Error if adding children would create a cycle
  */
 export const addChildren = (
   graph: TextGraph,
   parentIndex: Graph.NodeIndex,
   children: ReadonlyArray<S.TextNode>,
   relation: S.TextEdge["relation"]
-): TextGraph =>
-  Graph.mutate(graph, (mutable) => {
+): TextGraph => {
+  // Create candidate graph with new edges
+  const candidateGraph = Graph.mutate(graph, (mutable) => {
     children.forEach((child) => {
       const childIndex = Graph.addNode(mutable, child)
       Graph.addEdge(
@@ -118,8 +121,19 @@ export const addChildren = (
     })
   })
 
+  // Validate acyclicity - fail fast if cycle detected
+  if (!Graph.isAcyclic(candidateGraph)) {
+    throw new Error(
+      `Cannot add children: operation would create a cycle in the graph (parent: ${parentIndex})`
+    )
+  }
+
+  return candidateGraph
+}
+
 /**
  * Tokenize all sentence nodes in the graph, adding token children
+ * Idempotent: skips sentences that already have token children
  */
 export const tokenizeNodes = (
   graph: TextGraph
@@ -132,9 +146,19 @@ export const tokenizeNodes = (
       .map((idx) => ({ idx, node: Graph.getNode(graph, idx) }))
       .filter((item) => item.node._tag === "Some" && item.node.value.type === "sentence")
 
-    // Tokenize each sentence
+    // Tokenize each sentence (skip if already tokenized)
     for (const { idx, node } of sentenceNodes) {
       if (node._tag === "None") continue
+
+      // Check if this sentence already has token children (idempotency guard)
+      const children = getChildren(result, idx)
+      const hasTokenChildren = children.some((childIdx) => {
+        const childNode = Graph.getNode(result, childIdx)
+        return childNode._tag === "Some" && childNode.value.type === "token"
+      })
+
+      // Skip if already tokenized
+      if (hasTokenChildren) continue
 
       const tokens = yield* NLP.tokenize(node.value.text)
 
